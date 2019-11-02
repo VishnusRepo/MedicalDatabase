@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Scanner;
@@ -56,27 +57,36 @@ class Main
 	
 	public static void userCheck(Connection conn)throws Exception
 	{
-		/*Scanner scan = new Scanner(System.in);
-		System.out.println("Enter Username:-> E.g For student Severus Snape with id 111 -> SS111 ");
-		String user = scan.nextLine();
-		System.out.println("Enter Password:-> ");
-		String pwd = scan.nextLine();
-		PreparedStatement stmt = conn.prepareStatement("SELECT USERNAME,PASSWORD,ROLE,PERSON_ID FROM USER_LOGIN WHERE USERNAME=?");
-		stmt.setString(1, user);
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter Facility id");
+		String facilityid = scan.nextLine();
+		System.out.println("Enter Lastname");
+		String lastname = scan.nextLine();
+		System.out.println("Enter DOB: In format MM/DD/YYYY");
+		String dob = scan.nextLine();
+		System.out.println("Enter City");
+		String city = scan.nextLine();
+		System.out.println("Is Patient : Indicate yes/no");
+		String isPatient = scan.nextLine();
+		PreparedStatement stmt = conn.prepareStatement("select register.facility_id, patient.last_name, patient.dob, patient.city As city from patient, register where (register.patient_id = patient.patient_id AND patient.last_name = ? and to_char(patient.dob, 'mm/dd/yyyy') = ?)");
+		stmt.setString(1, lastname);
+		stmt.setString(2, dob);
 		ResultSet rs = stmt.executeQuery();
 		if (!rs.next()) {
 			System.out.println("Login Incorrect.\n");
 			loginmenu(conn);
 		}
-		String data_pwd = rs.getString("PASSWORD");
-        String role = rs.getString("ROLE");
-        String username = rs.getString("USERNAME");
-        int personid = rs.getInt("PERSON_ID");
-        if (!pwd.equals(data_pwd)) 
+		String data_pwd = rs.getString("city");
+        
+        if (!city.equals(data_pwd)) 
         {
             System.out.println("Login Incorrect.");
+            System.out.println(data_pwd);
             loginmenu(conn);
-        }*/
+        }
+        else {
+        	System.out.println(data_pwd);
+        }
      
 	}
 }
