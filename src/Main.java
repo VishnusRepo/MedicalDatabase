@@ -39,15 +39,20 @@ class Main
 	public static void loginmenu(Connection conn) throws Exception {
 		Scanner scan = new Scanner(System.in);
 		System.out.println("----------------------------Medical Facility--------------------------");
-		System.out.println("1. Signin");
-		System.out.println("2. Singup");
-		System.out.println("3. DemoQueries");
-		System.out.println("4. Exit");
+		System.out.println("1. Signin As patient");
+		System.out.println("2. Signin As staff");
+		System.out.println("3. Singup");
+		System.out.println("4. DemoQueries");
+		System.out.println("5. Exit");
         System.out.println("Enter your choice :-> ");
 		int select = scan.nextInt();
 		if(select == 1)
 		{
 			userCheck(conn);
+		}
+		else if(select == 2)
+		{
+			staffCheck(conn);
 		}
 		else
 		{
@@ -87,6 +92,29 @@ class Main
         else {
         	System.out.println(data_pwd);
         }
+     
+	}
+	public static void staffCheck(Connection conn)throws Exception
+	{
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter Service department code");
+		String deptcode = scan.nextLine();
+		System.out.println("Enter EmployeeID");
+		String empid = scan.nextLine();
+		PreparedStatement stmt = conn.prepareStatement("select STAFF_NAME,HIRE_DATE,EMPLOYEE_ID from MEDICAL_STAFF M where (M.EMPLOYEE_ID = ? and M.PRIMARY_SERVICE_DEPT_CODE= ?)");
+		stmt.setString(1, empid);
+		stmt.setString(2, deptcode);
+		ResultSet rs = stmt.executeQuery();
+		if (!rs.next()) {
+			System.out.println("Login Incorrect.\n");
+			loginmenu(conn);
+		}
+		String emp_id = rs.getString("EMPLOYEE_ID");
+			if(empid.equals(emp_id)) {
+			System.out.println("Login successful");
+			Staff S = new Staff(conn,emp_id);
+			S.staffHome();
+	}
      
 	}
 }
