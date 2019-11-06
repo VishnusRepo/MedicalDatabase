@@ -1,8 +1,3 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Scanner;
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 import java.util.concurrent.TimeUnit;
@@ -17,11 +12,10 @@ public class Staff {
 	Connection conn;
 	String emp_id;
 	
-	public Staff(Connection conn, String emp_id) {
+	public Staff(Connection conn) {
 		// TODO Auto-generated constructor stub
 		this.conn=conn;
-		this.emp_id=emp_id;
-		
+	
 }
 	public void staffHome() {
 		try {
@@ -31,7 +25,7 @@ public class Staff {
 			System.out.println("3. Add Symptoms");
 			System.out.println("4. Add severity scale");
 			System.out.println("5. Add assessment rule");
-			System.out.println("6. Go back");
+			System.out.println("6. Logout");
 			System.out.println("Enter your choice :-> ");
 			Scanner sc = new Scanner(System.in);
 			int staff_choice = sc.nextInt();
@@ -39,8 +33,14 @@ public class Staff {
 			case 1:
 				checkedInPatientList();
 				break;
+			case 6:
+				System.out.println("Logging out..");
+				TimeUnit.SECONDS.sleep(3);
+				System.exit(0);
+				break;
 			default:
-				System.out.println("Invalid option");
+				System.out.println("Invalid option,please enter a valid choice");
+				staffHome();
 				break;
 			}
 		} catch(Exception ex) {
@@ -52,11 +52,12 @@ public class Staff {
 	public void checkedInPatientList()  {
 		try {
 			System.out.println("----------------------CHECKED-IN PATIENT LIST--------------------");
-			PreparedStatement stmt = conn.prepareStatement(
-					"SELECT P.PATIENT_ID AS PID,P.FIRST_NAME AS FNAME,P.LAST_NAME AS LNAME FROM PATIENT P,patient_session S WHERE P.PATIENT_ID = S.PATIENT_ID");
-			ResultSet r = stmt.executeQuery();
+			Statement st = conn.createStatement();
+			//PreparedStatement stmt = conn.prepareStatement(
+				//	"SELECT P.PATIENT_ID AS PID,P.FIRST_NAME AS FNAME,P.LAST_NAME AS LNAME FROM PATIENT P,patient_session S WHERE P.PATIENT_ID = S.PATIENT_ID");
+			ResultSet r = st.executeQuery("SELECT PATIENT.PATIENT_ID AS PID, PATIENT.FIRST_NAME AS FNAME, PATIENT.LAST_NAME AS LNAME FROM PATIENT,PATIENT_SESSION WHERE PATIENT.PATIENT_ID= PATIENT_SESSION.PATIENT_ID");
+			//ResultSet r = st.executeQuery("SELECT P.PATIENT_ID AS PID,P.FIRST_NAME AS FNAME,P.LAST_NAME AS LNAME FROM PATIENT P,patient_session S WHERE P.PATIENT_ID = S.PATIENT_ID");
 			while (r.next()) {
-				System.out.println("Hii");
 				System.out.println("Patient ID :-> " + r.getInt("PID"));
 				System.out.println("First Name :-> " + r.getString("FNAME"));
 				System.out.println("Last Name :-> " + r.getString("LNAME"));
@@ -65,5 +66,15 @@ public class Staff {
 } catch (Exception ex) {
 	System.out.println(ex);
 }
+		try {
+			System.out.println("--------------------------MENU PAGE ----------------------------");
+			System.out.println("1. ENTER VITALS");
+			System.out.println("2. TREAT PATIENT");
+			System.out.println("3. GO BACK");
 	}
+		catch (Exception ex) {
+			System.out.println(ex);
+		}
 }
+}
+	
