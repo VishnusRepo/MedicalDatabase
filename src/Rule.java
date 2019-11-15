@@ -1,4 +1,3 @@
-
 public class Rule {
 	
 	public String symptom_name;

@@ -39,26 +39,22 @@ class Main
 	public static void loginmenu(Connection conn) throws Exception {
 		Scanner scan = new Scanner(System.in);
 		System.out.println("----------------------------Medical Facility--------------------------");
-		System.out.println("1. Patient Signin");
-		System.out.println("2. Staff Singin");
-		System.out.println("3. Signup");
-		System.out.println("4. DemoQueries");
-		System.out.println("5. Exit");
+		System.out.println("1. Sign In");
+		System.out.println("2. Sign Up(patient)");
+		System.out.println("3. Demo Queries");
+		System.out.println("4. Exit");
         System.out.println("Enter your choice :-> ");
 		int select = scan.nextInt();
 	   switch(select){
 	   case 1:
-		   patientCheck(conn);
+		   userCheck(conn);
 			break;
 	   case 2: 
-		   staffCheck(conn);
+		   patientSignup(conn);
 		   break;
 	   case 3:
-		   patientSingup(conn);
 		   break;
 	   case 4:
-		   break;
-	   case 5:
 		   System.exit(0);
 		   break;
 		default:
@@ -67,52 +63,112 @@ class Main
 		}
 	}
 	
-	public static void patientCheck(Connection conn)throws Exception
+	public static void userCheck(Connection conn)throws Exception
 	{
-		Scanner scan = new Scanner(System.in);
-		System.out.println("Enter Facility id");
-		String facilityid = scan.nextLine();
-		System.out.println("Enter Lastname");
-		String lastname = scan.nextLine();
-		System.out.println("Enter DOB: In format MM/DD/YYYY");
-		String dob = scan.nextLine();
-		System.out.println("Enter City");
-		String city = scan.nextLine();
-		System.out.println("Is Patient : Indicate yes/no");
-		String isPatient = scan.nextLine();
-		PreparedStatement stmt = conn.prepareStatement("select register.facility_id, patient.last_name, patient.dob, patient.city as city from patient, register where (register.patient_id = patient.patient_id AND patient.last_name = ? and to_char(patient.dob, 'mm/dd/yyyy') = ?)");
-		stmt.setString(1, lastname);
-		stmt.setString(2, dob);
-		ResultSet rs = stmt.executeQuery();
-		if (!rs.next()) {
-			System.out.println("Login Incorrect.\n");
-			loginmenu(conn);
+		System.out.println("SIGN IN PAGE");
+		Statement st = conn.createStatement();
+		ResultSet r = st.executeQuery("SELECT FACILITY_ID AS FID FROM MEDICALFACILITY");
+		System.out.println("List of Facility ID's");
+		while (r.next()) {
+			System.out.println(r.getInt("FID"));
 		}
-		String data_pwd = rs.getString("city");
-        
-        if (!city.equals(data_pwd)) 
-        {
-            System.out.println("Login Incorrect.");
-            System.out.println(data_pwd);
-            loginmenu(conn);
-        }
-        else {
-        	System.out.println(data_pwd);
-        }
-     
+		Scanner scan1 = new Scanner(System.in);
+		System.out.println("Enter Facility id");
+		String fid = scan1.nextLine();
+		System.out.println("Enter Lastname");
+		String lastname = scan1.nextLine();
+		System.out.println("Enter DOB: In format MM/DD/YYYY");
+		String dob = scan1.nextLine();
+		System.out.println("Enter City");
+		String city = scan1.nextLine();
+		System.out.println("Is Patient : Indicate yes/no");
+		String isPatient = scan1.nextLine();
+		int facilityid = Integer.parseInt(fid);
+		System.out.println("1. Sign In");
+		System.out.println("2. Go Back");
+		int choice = scan1.nextInt();
+		   switch(choice){
+		   case 1:
+				if(isPatient.equals("yes")) {
+					PreparedStatement stmt = conn.prepareStatement("select PATIENT_ID FROM PATIENT where patient.last_name = ? and to_char(patient.dob, 'mm/dd/yyyy') = ? and patient.city=?");
+					stmt.setString(1, lastname);
+					stmt.setString(2, dob);
+					stmt.setString(3, city);
+					ResultSet rs = stmt.executeQuery();
+					if (rs.next()) {
+						System.out.println("Patient Login Successful");
+						int patient_id= rs.getInt("PATIENT_ID");
+						PreparedStatement stmt2 = conn.prepareStatement("select * from register where patient_id = ? ");
+						stmt2.setInt(1,patient_id);
+						ResultSet rs1 = stmt2.executeQuery();
+						if(rs1!=null) {
+							Patient P = new Patient(conn,patient_id);
+							P.patientHome();
+						}else {
+							PreparedStatement stmt1 = conn.prepareStatement("insert into register values(?, ?)");
+	                        stmt1.setInt(1, patient_id);
+	                        stmt1.setInt(2, facilityid);
+	                        stmt1.executeQuery();
+							Patient P = new Patient(conn,patient_id);
+							P.patientHome();
+					   }
+					}
+					else {
+						System.out.println("Login Incorrect.\n");
+						loginmenu(conn);
+					}
+			     }
+					else {
+						PreparedStatement stmt = conn.prepareStatement("select EMPLOYEE_ID from MEDICAL_STAFF where MEDICAL_STAFF.last_name = ? and to_char(MEDICAL_STAFF.dob, 'mm/dd/yyyy') = ? and MEDICAL_STAFF.CITY = ?");
+						stmt.setString(1, lastname);
+						stmt.setString(2, dob);
+						stmt.setString(3, city);
+						ResultSet rs = stmt.executeQuery();
+						PreparedStatement stmt2 = conn.prepareStatement("select EMPLOYEE_ID from NON_MEDICAL_STAFF where NON_MEDICAL_STAFF.last_name = ? and to_char(NON_MEDICAL_STAFF.dob, 'mm/dd/yyyy') = ? and NON_MEDICAL_STAFF.CITY = ?");
+						stmt2.setString(1, lastname);
+						stmt2.setString(2, dob);
+						stmt2.setString(3, city);
+						ResultSet rs1 = stmt2.executeQuery();
+						
+						if (rs.next()) {
+							String employeecheck_id = rs.getString("EMPLOYEE_ID");
+							System.out.println("Login Successful");
+							Staff s = new Staff(conn,employeecheck_id,facilityid);
+							s.staffHome();
+							}
+						if (rs1.next()) {
+							String employeecheck_id = rs1.getString("EMPLOYEE_ID");
+							System.out.println("Login Successful");
+							Staff s = new Staff(conn,employeecheck_id,facilityid);
+							s.staffHome();
+							}
+						else {
+							System.out.println("Sign In Incorrect, Please Enter again\n");
+							userCheck(conn);
+						}
+					}
+				break;
+		   case 2: 
+			   loginmenu(conn);
+			   break;
+		   default:
+				System.out.println("Enter a valid choice");
+				loginmenu(conn);
+		   }
 	}
 	
-	public static void staffCheck(Connection conn)throws Exception
+	
+	/*public static void staffcheck(Connection conn)throws Exception
 	{
 		Scanner scan = new Scanner(System.in);
 		System.out.println("Enter Employee id");
 		String employeeId = scan.nextLine();
 		System.out.println("Enter Name");
 		String name = scan.nextLine();
-		PreparedStatement stmt1 = conn.prepareStatement("select first_name as name, employee_id as id from medical_staff where employee_id = ?");
+		PreparedStatement stmt1 = conn.prepareStatement("select staff_name as name, employee_id as id from medical_staff where employee_id = ?");
 		stmt1.setString(1, employeeId);
 		ResultSet rs1 = stmt1.executeQuery();
-		PreparedStatement stmt2 = conn.prepareStatement("select first_name as name, employee_id as id from non_medical_staff where employee_id = ?");
+		PreparedStatement stmt2 = conn.prepareStatement("select staff_name as name, employee_id as id from non_medical_staff where employee_id = ?");
 		stmt2.setString(1, employeeId);
 		ResultSet rs2 = stmt2.executeQuery();
 		String data_pwd = "";
@@ -134,15 +190,14 @@ class Main
             loginmenu(conn);
         }
         else {
-        	//Staff class call
-        	Staff staff = new Staff(conn);
-        	staff.staffHome();
-        	loginmenu(conn);
+        	System.out.println(name + "Logged in");
+        	Staff S= new Staff(conn);
+        	S.staffHome();
         }
      
-	}
+	}*/
 	
-	public static void patientSingup(Connection conn)throws Exception
+	public static void patientSignup(Connection conn)throws Exception
 	{
 		Scanner scan = new Scanner(System.in);
 		System.out.println("Enter First Name");
@@ -163,19 +218,37 @@ class Main
 		String country = scan.nextLine();
 	    System.out.println("Enter Phone Number with out any country codes");	
 	    String phnumber = scan.nextLine();
-		PreparedStatement stmt1 = conn.prepareStatement("insert into patient values(patient_seq.nextval, ?, ?, to_date(?, 'mm/dd/yyyy'),?, ?, ?,?, ?, ?)");
-		stmt1.setString(1, firstname);
-		stmt1.setString(2, lastname);
-		stmt1.setString(3,dob);
-		stmt1.setString(4,phnumber);
-		stmt1.setInt(5, aptno);
-		stmt1.setString(6, street);
-		stmt1.setString(7, city);
-		stmt1.setString(8,state);
-		stmt1.setString(9,country);
-		stmt1.executeUpdate();
-		System.out.println("Patient Signed up");
+		//String isPatientUp = scan.nextLine();
+		System.out.println("1. Sign Up");
+		System.out.println("2. Go Back");
+		int choice = scan.nextInt();
+		switch(choice) {
+			case 1:
+				PreparedStatement stmt1 = conn.prepareStatement("insert into patient values(patient_seq.nextval, ?, ?, to_date(?, 'mm/dd/yyyy'),?, ?, ?,?, ?, ?)");
+				stmt1.setString(1, firstname);
+				stmt1.setString(2, lastname);
+				stmt1.setString(3,dob);
+				stmt1.setString(4,phnumber);
+				stmt1.setInt(5, aptno);
+				stmt1.setString(6, street);
+				stmt1.setString(7, city);
+				stmt1.setString(8,state);
+				stmt1.setString(9,country);
+				System.out.println("Patient Signed up, Now please sign in");
+				stmt1.executeUpdate();
+				conn.commit();
+				userCheck(conn);
+				break;
+			case 2:
+				loginmenu(conn);
+				break;
+			default:
+				System.out.println("Please Enter a valid Option");
+				patientSignup(conn);
+				break;
+		}
+		//stmt1.executeUpdate();
 		
-	}
-	    
+		
+	}    
 }
