@@ -6,6 +6,12 @@ import java.text.SimpleDateFormat;
 
 import java.util.*;
 
+class OutcomeReport
+{
+	public int patient_id,appointment_id,neg_code,facility_id=0,reason_code;
+	public String outcome_status,referrar_id,service_code,refer_add_info,neg_add_info,treat_info;
+}
+
 public class Staff {
 
 	Connection conn;
@@ -18,7 +24,7 @@ public class Staff {
 		this.conn=conn;
 	    employeecheck_id=employee_id;
 	    fac_id=facilityid;
-} 
+   } 
 	public void staffHome() {
 		try {
 			System.out.println("--------------------------Welcome Staff----------------------------");
@@ -33,8 +39,8 @@ public class Staff {
 			int staff_choice = sc.nextInt();
 			switch (staff_choice) {
 			case 1:
-				checkedInPatientList();
-				break;
+				 checkedInPatientList();
+				 break;
 			case 2:
 				 //treated patient list
 				 treatedPatientList();
@@ -213,6 +219,14 @@ public class Staff {
 			   }
 			   Scanner scan1 = new Scanner(System.in);
 			   int patientToCheckOut = scan1.nextInt();
+			   OutcomeReport report = new OutcomeReport();
+			   PreparedStatement st1 = conn.prepareStatement("SELECT APPOINTMENT_ID AS APP_ID from PATIENT_SESSION where patient_id=?");
+			   st1.setInt(1, patientToCheckOut);
+			   ResultSet rs1 = st1.executeQuery();
+			   report.patient_id=patientToCheckOut;
+			   report.appointment_id=rs1.getInt("APP_ID");
+			   System.out.println(report.patient_id);
+			   System.out.println(report.appointment_id);
 			   System.out.println("1. Check Out");
 			   System.out.println("2. Go back");
 			   int treat_choice = scan1.nextInt();
@@ -221,10 +235,10 @@ public class Staff {
 			     
 			   case 1:
 				   // check out
-				   patientCheckOut(patientToCheckOut);
+				   patientCheckOut(report);
 				   break;
 			   case 2:
-				   // goback
+				   // go back
 				   staffHome();
 				   break;
 			   default:
@@ -238,7 +252,7 @@ public class Staff {
 			}
 	}
 	
-	public void patientCheckOut(int patientToCheckOut) {
+	public void patientCheckOut(OutcomeReport report) {
 		try { 
 			   System.out.println("--------------------------Staff - Patient Report ----------------------------");
 			   System.out.println("1. Discharge Status ");
@@ -253,16 +267,32 @@ public class Staff {
 				switch (checkout_choice) {
 				   case 1:
 					   //Discharge status
-					   dischargeStatus(patientToCheckOut);
+					   dischargeStatus(report);
 					   break;
 				   case 2: 
 					   //Referral status
+					   //check status is referred
+					   PreparedStatement st = conn.prepareStatement("SELECT OUTCOME_STATUS as OStat from DISCHARGE_STATUS where PATIENT_ID=? and APPOINTMENT_ID=?");
+					   st.setInt(1, report.patient_id);
+					   st.setInt(2, report.appointment_id);
+					   ResultSet rs = st.executeQuery();
+					   if(rs.getString("OStat") == "Referred") {
+						   referralStatus(report);
+					   }else {
+						   System.out.println("Invalid entry choice ");
+						   patientCheckOut(report);
+					   }
 					   break;
 				   case 3:
 					   //Treatment
+					   System.out.println(" Enter the Treatment Description: ");
+					   String desc = sc.nextLine();
+					   report.treat_info=desc;
+					   patientCheckOut(report);
 					   break;
 				   case 4:
 					   //Negative Experience
+					   negativeReport(report);
 					   break;
 				   case 5:
 					   // go back
@@ -283,36 +313,41 @@ public class Staff {
 			}
 	}
 	
-	public void dischargeStatus(int patientToCheckOut) {
+	public void dischargeStatus(OutcomeReport report) {
 		
 		try {
 			   System.out.println("-------------------------- Discharge Report ----------------------------");
+			   System.out.println("Enter your choice: ");
 			   System.out.println("1. Successfull treatment ");
 			   System.out.println("2. Deceased ");
 			   System.out.println("3. Referred");
 			   System.out.println("4. Go Back ");
-			   
 			   Scanner sc = new Scanner(System.in);
 			   int checkout_choice = sc.nextInt();
-				switch (checkout_choice) {
-					case 1:
-						// Successful treatment
-						
-						break;
-					case 2:
-						// Deceased
-						break;
-					case 3: 
-						// Referred
-						break;
-					case 4:
-						//go back
-						patientCheckOut(patientToCheckOut);
-						break;
-					default:
-						System.out.println("Invalid option,please enter a valid choice");
-						break;
-				}
+			   
+			   if(checkout_choice==1) {
+				    // TREATED SUCCESSFULL
+				    report.outcome_status="Treated Sucessfully";
+					patientCheckOut(report);
+			   }
+			   else if(checkout_choice==2) {
+				   //DECEADED
+				    report.outcome_status="Deceased";
+					patientCheckOut(report);
+			   }
+			   else if(checkout_choice==3) {
+				    // REFERRED
+				   report.outcome_status="Referred";
+					patientCheckOut(report);
+			   }
+			   else if(checkout_choice==4) {
+				   // GO BACK
+				   patientCheckOut(report);
+			   }else {
+				   System.out.println("Invalid Entry of Choice, Please try again");
+				   dischargeStatus(report);
+			   }
+					
 			
 		}catch (Exception ex) {
 			System.out.println(ex);
@@ -320,6 +355,105 @@ public class Staff {
 		 
 	}
 	
+	public void referralStatus(OutcomeReport report) {
+		 try {
+			   System.out.println("-------------------------- Refferal Status ----------------------------");
+			   
+			   System.out.println("1. Facility id");
+			   System.out.println("2. Referrer id");
+			   System.out.println("3. Enter a Reason ");
+			   System.out.println("4. Go back");
+			   Scanner sc = new Scanner(System.in);
+			   int refer_choice = sc.nextInt();
+			   
+			   if(refer_choice==1) {
+				   System.out.println("1. Enter a Facility id");
+				   int fac_id = sc.nextInt();
+				   report.facility_id=fac_id;
+				   //referralStatus(report);
+				   
+			   }else if(refer_choice==2) {
+				   System.out.println("2. Enter a Referrer id ");
+				   String ref_id = sc.nextLine();
+				   report.referrar_id=ref_id;
+				   //referralStatus(report);
+				   
+			   }else if(refer_choice==3) {
+				    // add reason
+				    addReferReason(report);
+				    
+			   }else if(refer_choice==4) {
+				    // go back
+				   patientCheckOut(report);
+			   }else {
+				   System.out.println("Invalid Entry of Choice, Please try again");
+				   referralStatus(report);
+			   }
+			   
+		 }catch (Exception ex) {
+				System.out.println(ex);
+		}
+	}
+	
+	
+	public void addReferReason(OutcomeReport report) {
+		try {
+			  
+			   
+		 }catch (Exception ex) {
+				System.out.println(ex);
+		}
+	}
+	
+	public void negativeReport(OutcomeReport report) {
+		 try {
+			   System.out.println("-------------------------- Negative Experience ----------------------------");
+			   System.out.println("Enter your choice: ");
+			   System.out.println("1. Negative Experience Code ");
+			   System.out.println("2. Go Back ");
+			   Scanner sc = new Scanner(System.in);
+			   int negative_choice = sc.nextInt();
+			   
+			   if(negative_choice == 1) {
+				   // neg code
+				   selectNegCode(report);
+			   }else if(negative_choice == 2) {
+				    //go back
+				    patientCheckOut(report);
+			   }else {
+				   System.out.println("Invalid Entry of Choice, Please try again");
+				   negativeReport(report);
+			   }
+			   
+		 }catch (Exception ex) {
+				System.out.println(ex);
+		}
+	}
+	
+	public void selectNegCode(OutcomeReport report) {
+		try {
+			   System.out.println("-------------------------- Negative Experience ----------------------------");
+			   
+			   PreparedStatement st = conn.prepareStatement("SELECT NEG_CODE as NCODE,NEGATIVE_DESCRIPTION as NDESC from NEGATIVE_EXP_OUT");
+			   ResultSet rs = st.executeQuery();
+			   while (rs.next()) {
+					System.out.print(rs.getInt("NCODE"));
+					System.out.print("             ");
+					System.out.println(rs.getInt("NDESC"));
+			   }
+			   System.out.println("Select the negative experience code : ");
+			   Scanner scan1 = new Scanner(System.in);
+			   int negative_choice = scan1.nextInt();
+			   
+			   System.out.println("Enter any addtional negative information: ");
+			   String desc = scan1.nextLine();
+			   report.neg_code=negative_choice;
+			   report.neg_add_info=desc;
+			   
+		 }catch (Exception ex) {
+				System.out.println(ex);
+		}
+	}
 	public void addSymptom() {
 		System.out.println("----------------------Add Symptom-------------------");
 		Scanner scan = new Scanner(System.in);
