@@ -90,10 +90,10 @@ class Main
 		   switch(choice){
 		   case 1:
 				if(isPatient.equals("yes")) {
-					PreparedStatement stmt = conn.prepareStatement("select PATIENT_ID FROM PATIENT where patient.last_name = ? and to_char(patient.dob, 'mm/dd/yyyy') = ? and patient.city=?");
-					stmt.setString(1, lastname);
+					PreparedStatement stmt = conn.prepareStatement("select PATIENT_ID FROM PATIENT where upper(patient.last_name) = ? and to_char(patient.dob, 'mm/dd/yyyy') = ? and upper(patient.city)=?");
+					stmt.setString(1, lastname.toUpperCase());
 					stmt.setString(2, dob);
-					stmt.setString(3, city);
+					stmt.setString(3, city.toUpperCase());
 					ResultSet rs = stmt.executeQuery();
 					if (rs.next()) {
 						System.out.println("Patient Login Successful");
@@ -119,15 +119,15 @@ class Main
 					}
 			     }
 					else {
-						PreparedStatement stmt = conn.prepareStatement("select EMPLOYEE_ID from MEDICAL_STAFF where MEDICAL_STAFF.last_name = ? and to_char(MEDICAL_STAFF.dob, 'mm/dd/yyyy') = ? and MEDICAL_STAFF.CITY = ?");
-						stmt.setString(1, lastname);
+						PreparedStatement stmt = conn.prepareStatement("select EMPLOYEE_ID from MEDICAL_STAFF where upper(MEDICAL_STAFF.last_name) = ? and to_char(MEDICAL_STAFF.dob, 'mm/dd/yyyy') = ? and upper(MEDICAL_STAFF.CITY) = ?");
+						stmt.setString(1, lastname.toUpperCase());
 						stmt.setString(2, dob);
-						stmt.setString(3, city);
+						stmt.setString(3, city.toUpperCase());
 						ResultSet rs = stmt.executeQuery();
-						PreparedStatement stmt2 = conn.prepareStatement("select EMPLOYEE_ID from NON_MEDICAL_STAFF where NON_MEDICAL_STAFF.last_name = ? and to_char(NON_MEDICAL_STAFF.dob, 'mm/dd/yyyy') = ? and NON_MEDICAL_STAFF.CITY = ?");
-						stmt2.setString(1, lastname);
+						PreparedStatement stmt2 = conn.prepareStatement("select EMPLOYEE_ID from NON_MEDICAL_STAFF where upper(NON_MEDICAL_STAFF.last_name) = ? and to_char(NON_MEDICAL_STAFF.dob, 'mm/dd/yyyy') = ? and upper(NON_MEDICAL_STAFF.CITY) = ?");
+						stmt2.setString(1, lastname.toUpperCase());
 						stmt2.setString(2, dob);
-						stmt2.setString(3, city);
+						stmt2.setString(3, city.toUpperCase());
 						ResultSet rs1 = stmt2.executeQuery();
 						
 						if (rs.next()) {
