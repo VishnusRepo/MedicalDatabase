@@ -1,4 +1,4 @@
-create sequence patient_seq start with 1;
+create sequence patient_seq start with 5;
 
 create sequence session_seq start with 1;
 
@@ -84,7 +84,7 @@ CREATE TABLE BodyPart (
 bodypart_code varchar(6)
 );
 
-CREATE TABLE has_specialty (
+CREATE TABLE has_speciality (
       DEPT_CODE VARCHAR(5),
       bodypart_name VARCHAR2(32) NOT NULL,
       primary key(DEPT_CODE,bodypart_name),
@@ -98,8 +98,11 @@ CREATE TABLE Medical_staff (
       hire_date DATE,
       primary_service_dept_code VARCHAR2(5),
       SECONDARY_SERVICE_DEPT_CODE VARCHAR2(5),
-      
-      FOREIGN KEY(primary_service_dept_code) references SERVICE_DEPARTMENT(DEPT_CODE)
+      last_name varchar2(32),
+      DOB date,
+      city varchar2(32),
+      FOREIGN KEY(primary_service_dept_code) references SERVICE_DEPARTMENT(DEPT_CODE),
+      FOREIGN KEY(SECONDARY_SERVICE_DEPT_CODE) references SERVICE_DEPARTMENT(DEPT_CODE)
 );
 
 CREATE TABLE Non_medical_staff (
@@ -107,11 +110,12 @@ CREATE TABLE Non_medical_staff (
       employee_id VARCHAR2(32) PRIMARY KEY,
       hire_date DATE,
       primary_service_dept_code VARCHAR2(5),
+      SECONDARY_SERVICE_DEPT_CODE VARCHAR2(5),
       last_name varchar2(32),
       DOB date,
       city varchar2(32),
-      SECONDARY_SERVICE_DEPT_CODE VARCHAR2(5),
-      FOREIGN KEY(primary_service_dept_code) references SERVICE_DEPARTMENT(DEPT_CODE)
+      FOREIGN KEY(primary_service_dept_code) references SERVICE_DEPARTMENT(DEPT_CODE),
+      FOREIGN KEY(SECONDARY_SERVICE_DEPT_CODE) references SERVICE_DEPARTMENT(DEPT_CODE)
 );
 
 CREATE TABLE has_medical_medical (
@@ -177,7 +181,7 @@ CREATE TABLE register (
 create table symptom
 (
 symptom_name varchar2(30) primary key,
-sym_code varchar2(5) UNIQUE (sym_code)
+sym_code varchar2(5) UNIQUE
 
 );
 
@@ -265,18 +269,6 @@ CREATE TABLE REFERRAL_STATUS (
       foreign key(APPOINTMENT_ID) REFERENCES PATIENT_SESSION(APPOINTMENT_ID) on delete cascade,
       foreign key(REASON_CODE) REFERENCES REFER_REASON(REASON_CODE) on delete cascade,
       foreign key(SERVICE_CODE) REFERENCES Service(SERVICE_CODE) on delete cascade  
-);
-
-CREATE TABLE OUTCOME_REPORT (
-NEG_CODE INTEGER,
-DISCHARGESTATUS_CODE NUMBER,
-PATIENT_ID NUMBER,
-APPOINTMENT_ID INTEGER,
-PRIMARY KEY(NEG_CODE,DISCHARGESTATUS_CODE,PATIENT_ID,APPOINTMENT_ID),
-foreign key(NEG_CODE) REFERENCES NEGATIVE_EXP_OUT(NEG_CODE) on delete cascade,
-foreign key(DISCHARGESTATUS_CODE) REFERENCES DISCHARGE_STATUS(DISCHARGESTATUS_CODE) on delete cascade,
-foreign key(PATIENT_ID) REFERENCES PATIENT(PATIENT_ID) on delete cascade,
-foreign key(APPOINTMENT_ID) REFERENCES PATIENT_SESSION(APPOINTMENT_ID) on delete cascade
 );
 
 CREATE TABLE has_nonmedical_nonmedical (

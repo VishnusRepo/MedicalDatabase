@@ -1,3 +1,5 @@
+drop sequence patient_seq;
+drop sequence session_seq;
 drop table has_nonmedical_nonmedical;
 drop table OUTCOME_REPORT;
 drop table DISCHARGE_STATUS;
