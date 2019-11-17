@@ -121,6 +121,7 @@ INSERT into bodypart values('Right Arm', 'ARM001');
 INSERT into bodypart values('Abdominal', 'ABD000');
 INSERT into bodypart values('Chest', 'CST000');
 INSERT into bodypart values('Head', 'HED000');
+INSERT into bodypart values('Other', '000000');
 
 INSERT INTO HAS_SPECIALITY
 VALUES ('OP000', 'Eye');

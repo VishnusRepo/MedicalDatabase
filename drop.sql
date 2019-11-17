@@ -10,7 +10,7 @@ drop table register;
 drop table MedicalFacility;
 drop table Certification;
 drop table has_services;
-drop table has_specialty;
+drop table has_speciality;
 drop table has_medical_medical;
 drop table Medical_staff;
 drop table has_medical_nonmedical;

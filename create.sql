@@ -166,8 +166,11 @@ CREATE TABLE PATIENT_SESSION (
    check_out_time date,
    PATIENT_ACK VARCHAR2(100),
    DISCHARGE_DATE DATE,
+    out_time DATE,
+    facility_id INTEGER,
     foreign key(patient_id) references patient(patient_id) on delete cascade,
-    foreign key(ass_code) references assesment_outcome(ass_code) on delete cascade
+    foreign key(ass_code) references assesment_outcome(ass_code) on delete cascade,
+    foreign key(facility_id) REFERENCES MedicalFacility(facility_id)
     );
 
 CREATE TABLE register (
@@ -201,9 +204,10 @@ bodypart_name varchar2(32),
 duration number,
 is_chronic varchar2(1),
 incident varchar2(500),
+value varchar2(30),
 primary key(appointment_id, symptom_name, bodypart_name),
 foreign key(appointment_id) references patient_session(appointment_id) on delete cascade,
-foreign key(symptom_name) references symptom(symptom_name) on delete cascade,
+foreign key(symptom_name, value) references symptom_scale(symptom_name, value) on delete cascade,
 foreign key(bodypart_name) references bodypart(bodypart_name) on delete cascade
 );
 
