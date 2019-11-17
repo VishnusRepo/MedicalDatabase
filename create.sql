@@ -159,14 +159,15 @@ CREATE TABLE PATIENT_SESSION (
     patient_id number,
     systolic NUMBER(3),
     diastolic NUMBER(3),
-    check_in_time date,
+    check_in_time timestamp,
     temperature INTEGER,
     ass_code varchar2(32),
     PRIMARY KEY(APPOINTMENT_ID),
-   check_out_time date,
+   check_out_time timestamp,
    PATIENT_ACK VARCHAR2(100),
-   DISCHARGE_DATE DATE,
-    out_time DATE,
+   DISCHARGE_DATE timestamp,
+    out_time timestamp,
+    TREATMENT_STARTTIME TIMESTAMP,
     facility_id INTEGER,
     foreign key(patient_id) references patient(patient_id) on delete cascade,
     foreign key(ass_code) references assesment_outcome(ass_code) on delete cascade,
@@ -283,3 +284,30 @@ CREATE TABLE has_nonmedical_nonmedical (
     foreign key(employee_id) REFERENCES non_medical_staff(employee_id) on delete cascade
 );
 
+create or replace view facility_referred_facility as
+select dis.facility_id facility_id, fac_dep.facility_id referred_facility_id, count(*) count
+from
+discharge_status dis,
+referral_status ref,
+has_dept fac_dep,
+has_services dep_ser
+where
+fac_dep.dept_code = dep_ser.dept_code
+and ref.service_code = dep_ser.service_code
+and dis.appointment_id = ref.appointment_id
+group by dis.facility_id, fac_dep.facility_id
+;
+
+create or replace function demo_query_3
+return varchar2
+is
+returnVal VARCHAR2(200):='';
+BEGIN
+FOR item IN
+(select facility_id from medicalfacility)
+LOOP
+select CONCAT(CONCAT(returnVal || item.facility_id || ' - ' ,NVL(referred_facility_id,'-')), '\n') into returnVal from facility_referred_facility where facility_id = item.facility_id;
+END LOOP;
+RETURN returnVal;
+END demo_query_3;
+/
