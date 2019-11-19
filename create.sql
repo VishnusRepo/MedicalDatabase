@@ -304,9 +304,9 @@ is
 returnVal VARCHAR2(200):='';
 BEGIN
 FOR item IN
-(select facility_id from medicalfacility)
+(select distinct(facility_id) from facility_referred_facility)
 LOOP
-select CONCAT(CONCAT(returnVal || item.facility_id || ' - ' ,NVL(referred_facility_id,'-')), '\n') into returnVal from facility_referred_facility where facility_id = item.facility_id;
+select CONCAT(CONCAT(returnVal || item.facility_id || ' - ' ,NVL(to_char(referred_facility_id),'-')), ';') into returnVal from facility_referred_facility where facility_id = item.facility_id;
 END LOOP;
 RETURN returnVal;
 END demo_query_3;
